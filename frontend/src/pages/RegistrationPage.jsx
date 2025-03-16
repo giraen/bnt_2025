@@ -81,7 +81,7 @@ const RegistrationPage = () => {
             
             <div className="w-full h-96 flex flex-col items-center justify-center">
                 <p className='mb-2 md:text-lg'>Please present your QR code</p>
-                <video ref={videoRef} className="w-full h-full object-cover bg-[#000101]"></video>
+                <video ref={videoRef} className="h-full object-cover bg-[#000101]"></video>
             </div>
 
             {showPopup && (

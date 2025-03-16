@@ -1,11 +1,5 @@
 #root {
   text-align: center;
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  box-sizing: border-box;
+  width: 100%;
 }
