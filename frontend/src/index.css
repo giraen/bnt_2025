@@ -10,6 +10,7 @@
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
+  box-sizing: border-box;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,11 +22,12 @@
   --font-exo2: "Exo 2", sans-serif;
   --color-bg: #242424;
   --color-input: #d1d7c2;
+  --color-button: #30bb3c;
+  --color-darker-button: #144a17;
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
   text-decoration: inherit;
 }
 a:hover {
