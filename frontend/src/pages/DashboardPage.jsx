@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import supabase from "../supabase-client";
 import { useNavigate } from "react-router-dom";
 import QrScanner from 'qr-scanner';
-import { Link } from "react-router-dom";
+import DashboardTable from "../components/DashboardTable";
 
 const DashboardPage = () => {
     const navigate = useNavigate();
@@ -23,13 +23,56 @@ const DashboardPage = () => {
     
     useEffect(() => {
         // Initialize QR scanner
-        const scanner = new QrScanner(videoRef.current, (result) => {
+        const scanner = new QrScanner(videoRef.current, async (result) => {
             try {
                 const data = JSON.parse(result.data);
 
                 if (data.bnt_id && data.contact_number && data.email && data.food_allergies && data.fullname && data.school) {
                     setScannedData(data);
-                    setMessage("You may now claim your lunch!");
+                    scanner.stop();
+                    // Check if user registered
+                    const { data: registered_user, error } = await supabase
+                        .from("registration")
+                        .select("fullname")
+                        .eq("bnt_id", data.bnt_id)
+                        .single();
+                    
+                    // User didn't registered
+                    if (!registered_user) {
+                        setMessage("User isn't registered");
+                        return;
+                    }
+
+                    if (error) {
+                        setMessage("An error has occured. Please contact the admin.");
+                        return;
+                    }
+
+                    // Check if the registered user claimed their lunch
+                    const { data: claimed_lunch } = await supabase
+                        .from("claim_lunch")
+                        .select("fullname")
+                        .eq("fullname", data.fullname)
+                        .single();
+                    
+                    // Prompt if user claimed their lunch
+                    if (claimed_lunch) {
+                        setMessage("Lunch already claimed!");
+                    } else {
+                        // Insert claim to claim_lunch table
+                        const { error:insertionError } = await supabase
+                            .from("claim_lunch")
+                            .insert([{ fullname: data.fullname }])
+                            .select();
+
+                        if (insertionError) {
+                            setMessage("An error has occured. Please contact the admin.");
+                            console.error("Error inserting claim:", insertionError);
+                        } else {
+                            setMessage("You may now claim your lunch!");
+                        }
+                    }
+
                 } else {
                     setMessage("This is not a valid BNT QR");
                 }
@@ -39,7 +82,7 @@ const DashboardPage = () => {
                 console.error("Invalid QR Code format:", error);
             }
 
-            scanner.stop();
+            
         }, {
             highlightScanRegion: true,
             highlightCodeOutline: true,
@@ -56,50 +99,6 @@ const DashboardPage = () => {
     }, []);
 
     const handleClosePopup = async () => {
-        try {
-            const { data: registered_user, error } = await supabase
-                .from("registration")
-                .select("fullname")
-                .eq("bnt_id", scannedData.bnt_id)
-                .single();
-            
-            if (!registered_user) {
-                setMessage("User not found in registration!");
-                return;
-            }
-
-            if (error) {
-                setMessage("An error has occured. Please contact the admin.");
-                return;
-            }
-
-            const { data: claimed_lunch } = await supabase
-                .from("claim_lunch")
-                .select("fullname")
-                .eq("fullname", scannedData.fullname)
-                .single();
-            
-            if (claimed_lunch) {
-                setMessage("Lunch already claimed!");
-            } else {
-                const { error:insertionError } = await supabase
-                    .from("claim_lunch")
-                    .insert([{ fullname: scannedData.fullname }])
-                    .select();
-
-                if (insertionError) {
-                    setMessage("An error has occured. Please contact the admin.");
-                    console.error("Error inserting claim:", insertionError);
-                } else {
-                    setMessage("You may now claim your lunch!");
-                }
-            }
-
-        } catch (error) {
-            console.error("Database Error:", error);
-            setMessage("An error has occured. Please contact the admin.");
-        }
-
         setMessage(null);
 
         if (scannerRef.current) {
@@ -111,7 +110,7 @@ const DashboardPage = () => {
         <section className="md:h-screen overflow-hidden">
             <div className="flex justify-between py-2">
                 <button onClick={() => navigate("/")}>
-                    <Link to="/registration" className="transition">&lt; Home</Link>
+                    <a className="transition">&lt; Home</a>
                 </button>
                 <button onClick={signOut} className="hover:text-button cursor-pointer">Log Out</button>
             </div>
@@ -125,22 +124,11 @@ const DashboardPage = () => {
                 </div>
 
                 {/* Right div */}
-                <div className="row-span-3 md:col-span-3 md:row-span-5 md:col-start-3 sm:row-start-7 w-full overflow-y-auto md:py-28 md:pl-8">
-                    <p>Recent Claim of Lunch</p>
+                <div className="row-span-3 md:col-span-3 md:row-span-5 md:col-start-3 sm:row-start-7 w-full overflow-y-auto md:py-28 md:pl-8 flex flex-col items-center">
+                    <p className="font-bold text-2xl mb-4">Recent Claim of Lunch</p>
 
                     <div>
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>Fullname</th>
-                                <th>Claimed at</th>
-                            </tr>
-                            </thead>
-
-                            <tbody>
-                                {/* <Users user={}/> */}
-                            </tbody>
-                        </table>
+                        <DashboardTable/>
                     </div>
                 </div>
             </div>

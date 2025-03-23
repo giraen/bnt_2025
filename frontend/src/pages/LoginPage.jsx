@@ -42,8 +42,8 @@ const LoginPage = () => {
     };
 
     return(
-        <>
-            <p className="font-bold text-3xl text-center mb-6">Log In Page</p>
+        <section className="p-8 md:px-40">
+            <p className="font-bold text-3xl text-center mb-6 md:text-4xl">Log In</p>
             <br/>
             <form onSubmit={handleSubmit} className="w-full">
                 <input 
@@ -52,7 +52,7 @@ const LoginPage = () => {
                     required
                     onChange={(e) => setEmail(e.target.value)} 
                     value={email}
-                    className="w-full p-3 order border-black focus:ring-1 rounded-lg"/> <br/>
+                    className="w-full p-3 order border-black focus:ring-1 rounded-lg md:text-xl"/> <br/>
 
                 <input 
                     type="password" 
@@ -60,7 +60,7 @@ const LoginPage = () => {
                     required 
                     onChange={(e) => setPassword(e.target.value)} 
                     value={password}
-                    className="w-full p-3 border border-black focus:ring-1 rounded-lg"/> <br/> <br/>
+                    className="w-full p-3 border border-black focus:ring-1 rounded-lg md:text-xl"/> <br/> <br/>
 
                 {message && 
                     <>
@@ -70,7 +70,7 @@ const LoginPage = () => {
                 <button type="submit"
                     className="w-full bg-button text-white py-3 rounded-lg font-semibold hover:bg-darker-button transition">Log In</button>
             </form>
-        </>
+        </section>
     )
 }
 
