@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import supabase from "../supabase-client";
 
-const DashboardTable = () => {
+const DashboardTable = ({refresh}) => {
     const [data, setData] = useState([]);
 
     useEffect(() => {
@@ -24,7 +24,7 @@ const DashboardTable = () => {
         }
 
         getUsers();
-    }, [])
+    }, [refresh])
 
     const time_formatter = (date_time) => {
         const date = new Date(date_time);

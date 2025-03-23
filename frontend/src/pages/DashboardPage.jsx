@@ -11,6 +11,7 @@ const DashboardPage = () => {
     const videoRef = useRef(null);
     const [scannedData, setScannedData] = useState(null);
     const scannerRef = useRef(null);
+    const [refreshTable, setRefreshTable] = useState(false);
 
     const signOut = async () => {
         const { error } = await supabase.auth.signOut();
@@ -100,6 +101,7 @@ const DashboardPage = () => {
 
     const handleClosePopup = async () => {
         setMessage(null);
+        setRefreshTable(prev => !prev);
 
         if (scannerRef.current) {
             scannerRef.current.start();
@@ -128,7 +130,7 @@ const DashboardPage = () => {
                     <p className="font-bold text-2xl mb-4">Recent Claim of Lunch</p>
 
                     <div>
-                        <DashboardTable/>
+                        <DashboardTable refresh={refreshTable}/>
                     </div>
                 </div>
             </div>
