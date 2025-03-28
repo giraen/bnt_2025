@@ -19,7 +19,10 @@ const HomePage = () => {
             <p>THIS IS THE HOME PAGE</p>
 
             {isAuth ? (
-                <Link to="/dashboard">Dashboard (Admin)</Link>
+                <>
+                    <Link to="/dashboard">Dashboard (Admin)</Link> <br/>
+                    <Link to="/committee">For Committee (Admin)</Link>
+                </>
             ) : (
                 <Link to="/login">Login (Admin)</Link>
             )}
