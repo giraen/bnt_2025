@@ -1,6 +1,6 @@
 import QrScanner from 'qr-scanner';
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import supabase from "../supabase-client";
 import Heading from "../components/Heading";
 
@@ -77,7 +77,7 @@ const RegistrationPage = () => {
 
     return(
         <section className='grid grid-row-2 gap-y-5 md:gap-y-12 md:gap-x-20'>
-            <button onClick={() => navigate("/")} className='flex px-28'>
+            <button onClick={() => navigate("/")} className='flex px-4'>
                 <a className="transition">&lt; Home</a>
             </button>
 

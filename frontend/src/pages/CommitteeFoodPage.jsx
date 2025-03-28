@@ -2,6 +2,7 @@ import QrScanner from 'qr-scanner';
 import supabase from "../supabase-client";
 import { useEffect, useState, useRef } from "react";
 import Heading from "../components/Heading";
+import { useNavigate } from "react-router-dom";
 
 const CommitteeFoodPage = () => {
     const videoRef = useRef(null);
@@ -10,6 +11,8 @@ const CommitteeFoodPage = () => {
 
     const [message, setMessage] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
+
+    const navigate = useNavigate();
 
     const validate_tupid = (qr_data) => {
         if (!qr_data.startsWith("TUPM-")){
@@ -41,17 +44,19 @@ const CommitteeFoodPage = () => {
         // Initialize QR scanner
         const scanner = new QrScanner(videoRef.current, async (result) => {
             try {
-                const data = JSON.parse(result.data);
+                const scanned_data = result.data;
+                console.log(scanned_data);
+                scanner.stop();
                 
-                if (validate_tupid(data)) {  
-                    scanner.stop();
+                if (validate_tupid(scanned_data)) {  
+                    
 
                     const { data:done_claiming } = await supabase
                         .from('claim_lunch_committee')
                         .select("tup_id")
-                        .eq("tup_id", data);
+                        .eq("tup_id", scanned_data);
 
-                    if (done_claiming) {
+                    if (done_claiming && done_claiming.length > 0) {
                         setMessage("You have already claimed your lunch!");
                         setShowPopup(true);
                         return;
@@ -59,20 +64,20 @@ const CommitteeFoodPage = () => {
 
                     const { data, error } = await supabase
                         .from('claim_lunch_committee')
-                        .insert([{ tup_id: data }])
+                        .insert([{ tup_id: scanned_data }])
                         .select();
 
                     if (error) {
                         console.error(error);
+                    } else {
+                        setMessage("You may now claim your lunch!");
+                        setShowPopup(true);
                     }
                 } else {
                     setMessage("Different QR Detected!");
                     setShowPopup(true);
                 }
 
-                // setScannedData(data);
-                console.log("Scanned Data: ", data);
-                // setShowPopup(true);
             } catch (error) {
                 console.error("Invalid QR Code format:", error);
             }
@@ -94,18 +99,22 @@ const CommitteeFoodPage = () => {
     const handleClosePopup = () => {
         setMessage(null);
         setShowPopup(false);
+
+        if (scannerRef.current) {
+            scannerRef.current.start();
+        }
     }
 
     return(
-        <section>
-            <button onClick={() => navigate("/")} className='flex px-28'>
+        <section className='grid grid-row-2 gap-y-5 md:gap-y-12 md:gap-x-20'>
+            <button onClick={() => navigate("/")} className='flex px-4'>
                 <a className="transition">&lt; Home</a>
             </button>
 
-            <Heading/>
+            <Heading custom_heading={"FOOD FOR COMMITTEE"}/>
 
             <div className="w-full h-96 flex flex-col items-center justify-center">
-                <p className='mb-2 md:text-lg'>Please present your QR code</p>
+                <p className='mb-2 md:text-lg'>Please present your TUP ID</p>
                 <video ref={videoRef} className="h-full object-cover bg-[#000101]"></video>
             </div>
 
