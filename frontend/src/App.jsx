@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import Wrapper from './pages/Wrapper.jsx';
+import CommitteeFoodPage from './pages/CommitteeFoodPage.jsx';
 
 function App() {
   return (
@@ -19,6 +20,14 @@ function App() {
           element={
             <Wrapper>
               <DashboardPage/>
+            </Wrapper>
+          }/>
+        
+        <Route 
+          path='/committee' 
+          element={
+            <Wrapper>
+              <CommitteeFoodPage />
             </Wrapper>
           }/>
           
