@@ -10,24 +10,82 @@ const RegistrationPage = () => {
     const [scannedData, setScannedData] = useState(null);
     const scannerRef = useRef(null);
 
-    const [showPopup, setShowPopup] = useState(false);
+    const [message, setMessage] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         // Initialize QR scanner
-        const scanner = new QrScanner(videoRef.current, (result) => {
+        const scanner = new QrScanner(videoRef.current, async (result) => {
 
             try {
-                const data = JSON.parse(result.data);
-                setScannedData(data);
-                console.log("Scanned Data: ", data);
-                setShowPopup(true);
+                const data = result.data.trim();
+                scanner.stop();
+                
+                // Sanitize data to avoid SQL injection
+                if (typeof data !== "string" || !data.startsWith("25-") || data.length !== 8) {
+                    setMessage("Invalid QR code format.");
+                    return;
+                }
+
+                const split_data = data.split('-');
+                
+
+                if (split_data.length !== 2 || split_data[0] !== '25' || split_data[1].length !== 5) {
+                    setMessage("Invalid QR code format.");
+                    return;
+                }
+
+                // If the owner of QR scanned has registered
+                // check if their BNT ID is in the table participants
+                const { data: isRegistered, error: checkRegError } = await supabase
+                    .from("participants")
+                    .select("fullname, school")
+                    .eq("bnt_id", data)
+                    .single();
+
+                if (!isRegistered) {
+                    setMessage("User isn't registered online.");
+                    return;
+                }
+
+                if (checkRegError) {
+                    setMessage("An error has occurred while checking registration. Please try again.");
+                    return;
+                }
+
+                // Check if the QR has already been scanned and recorded for registration
+                // Check if their BNT ID is in the table record_participants
+                const { data: isRecorded } = await supabase
+                    .from("record_participants")
+                    .select("bnt_id")
+                    .eq("bnt_id", data)
+                    .single();
+
+                if (isRecorded) {
+                    setMessage("Participant is already registered.");
+                    return;
+                }
+
+                // If they registered but not yet recorded, insert into table record_participant
+                const { error: insertionError } = await supabase
+                    .from("record_participants")
+                    .insert([{ bnt_id: data }])
+                    .select();
+
+
+                if (insertionError) {
+                    setMessage("An error has occured.");
+                    return
+                }
+
+                // Set the pop up message into
+                // "{fullname} from {school} is now registered."
+                setMessage(`${isRegistered.fullname} from ${isRegistered.school} is now registered.`);
 
             } catch (error) {
                 console.error("Invalid QR Code format:", error);
+                return;
             }
-
-            scanner.stop();
 
         }, {
             highlightScanRegion: true,
@@ -43,32 +101,9 @@ const RegistrationPage = () => {
         };
     },[]);
 
-    const handleClosePopup = async (isInfoCorrect) => {
-        if (isInfoCorrect) {
-            const { error } = await supabase.from("registration").insert([scannedData]);
-            setShowPopup(false);
-
-            if ( error ) {
-                console.error("Supabase Insert Error:", error.message);
-                if (error.code === "23505") {
-                    setErrorMessage("This QR code has already been scanned.");
-                } else {
-                    setErrorMessage("An error occurred. Please try again.");
-                }
-
-                return;
-            }
-        }
-        
+    const handleClosePopup = () => {
         setScannedData(null);
-
-        if (scannerRef.current) {
-            scannerRef.current.start();
-        }
-    }
-
-    const handleCloseErrMessage = () => {
-        setErrorMessage(false);
+        setMessage(null);
 
         if (scannerRef.current) {
             scannerRef.current.start();
@@ -88,38 +123,14 @@ const RegistrationPage = () => {
                 <video ref={videoRef} className="h-full object-cover bg-[#000101]"></video>
             </div>
 
-            {showPopup && (
+            {message && (
                 <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex justify-center items-center z-50">
-                    <div className="bg-bg p-12 rounded-lg shadow-lg w-80 text-center">
-                        <p className='capitalize font-bold text-4xl'>Confirmation</p>
-                        <br/>
-                        <p className= "text-left">
-                            <strong>BNT ID:</strong> <span>{scannedData.bnt_id}</span><br/>
-                            <strong>Email:</strong> <span>{scannedData.email}</span><br/>
-                            <strong>Fullname:</strong> <span>{scannedData.fullname}</span><br/>
-                            <strong>School:</strong> <span>{scannedData.school}</span><br/>
-                            <strong>Contact Number:</strong> <span>{scannedData.contact_number}</span><br/>
-                            <strong>Food Allergies:</strong> <span>{scannedData.food_allergies}</span><br/>
+                    <div className="bg-bg p-4 rounded-lg shadow-lg w-80 flex justify-between flex-col text-center">
+                        <button onClick={handleClosePopup} className="font-extrabold text-right">X</button>
+                        <p className="px-4 py-4 text-xl">
+                            {message}
                         </p>
-
-                        <div className="flex justify-around mt-4">
-                            <button className="bg-green-500 text-white px-4 py-2 rounded-lg" onClick={() => handleClosePopup(true)}>Correct</button>
-                            <button className="bg-[#303030] text-white px-4 py-2 rounded-lg" onClick={() => handleClosePopup(true)}>Incorrect</button>
-                        </div>
-                        
                     </div>
-                    
-                </div>
-            )}
-
-            {errorMessage && (
-                <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex justify-center items-center z-50">
-                    <div className="bg-bg p-12 rounded-lg shadow-lg w-80 text-center">
-                        <p className="text-red-600 font-semibold text-justify">{errorMessage}</p>
-                        <br/>
-                        <button className="bg-green-500 text-white px-4 py-2 rounded-lg" onClick={handleCloseErrMessage}>Okay!</button>
-                    </div>
-                    
                 </div>
             )}
         </section>

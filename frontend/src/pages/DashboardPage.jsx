@@ -26,61 +26,57 @@ const DashboardPage = () => {
         // Initialize QR scanner
         const scanner = new QrScanner(videoRef.current, async (result) => {
             try {
-                const data = JSON.parse(result.data);
+                const data = result.data.trim();
 
-                if (data.bnt_id && data.contact_number && data.email && data.food_allergies && data.fullname && data.school) {
-                    setScannedData(data);
-                    scanner.stop();
-                    // Check if user registered
-                    const { data: registered_user, error } = await supabase
-                        .from("registration")
-                        .select("fullname")
-                        .eq("bnt_id", data.bnt_id)
-                        .single();
-                    
-                    // User didn't registered
-                    if (!registered_user) {
-                        setMessage("User isn't registered");
-                        return;
-                    }
-
-                    if (error) {
-                        setMessage("An error has occured. Please contact the admin.");
-                        return;
-                    }
-
-                    // Check if the registered user claimed their lunch
-                    const { data: claimed_lunch } = await supabase
-                        .from("claim_lunch")
-                        .select("fullname")
-                        .eq("fullname", data.fullname)
-                        .single();
-                    
-                    // Prompt if user claimed their lunch
-                    if (claimed_lunch) {
-                        setMessage("Lunch already claimed!");
-                    } else {
-                        // Insert claim to claim_lunch table
-                        const { error:insertionError } = await supabase
-                            .from("claim_lunch")
-                            .insert([{ fullname: data.fullname }])
-                            .select();
-
-                        if (insertionError) {
-                            setMessage("An error has occured. Please contact the admin.");
-                            console.error("Error inserting claim:", insertionError);
-                        } else {
-                            setMessage("You may now claim your lunch!");
-                        }
-                    }
-
-                } else {
-                    setMessage("This is not a valid BNT QR");
+                // Sanitize data to avoid SQL injection
+                if (typeof data !== "string" || !data.startsWith("25-") || data.length !== 8) {
+                    setMessage("Invalid QR code format.");
+                    return;
                 }
+
+                const split_data = data.split('-');
+                scanner.stop();
+                
+                
+                if (split_data.length !== 2 || split_data[0] !== '25' || split_data[1].length !== 5) {
+                    setMessage("Invalid QR code format.");
+                    return;
+                } 
+                
+                // Check if the participant attendance was recorded
+                const { data: isRecorded, error: checkRecError } = await supabase
+                    .from("record_participants")
+                    .select("bnt_id")
+                    .eq("bnt_id", data)
+                    .single();
+                
+                if (!isRecorded) {
+                    setMessage("User isn't registered.");
+                    return;
+                }
+
+                if (checkRecError) {
+                    setMessage('An error has occured.');
+                    return;
+                }
+
+                // If not yet, then insert their bnt_id
+                const { data: insertClaim, error: insertClaimError } = await supabase
+                    .from("claim_lunch_participants")
+                    .insert([{ bnt_id: data }])
+                    .select();
+                
+                if (insertClaimError) {
+                    setMessage("Lunch already claimed");
+                    return;
+                }
+
+                setMessage('You may now claim your lunch.');
 
             } catch (error) {
                 setMessage("This is not a valid BNT QR");
                 console.error("Invalid QR Code format:", error);
+                return;
             }
 
             
