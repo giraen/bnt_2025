@@ -8,8 +8,11 @@ const DashboardTable = ({refresh}) => {
         const getUsers = async () => {
             try {
                 const { data, error } = await supabase
-                    .from("claim_lunch")
-                    .select("fullname, claim_time")
+                    .from("claim_lunch_participants")
+                    .select(`
+                        claim_time,
+                        participants (fullname)
+                    `)
                     .order("claim_time", { ascending: false })
                     .limit(10);
 
@@ -48,7 +51,7 @@ const DashboardTable = ({refresh}) => {
                 <tbody>
                     {data.map((data, index) => (
                         <tr key={index}>
-                            <td className="p-2 row-span-1">{data.fullname}</td>
+                            <td className="p-2 row-span-1">{data.participants?.fullname}</td>
                             <td className="p-2">{time_formatter(data.claim_time)}</td>
                         </tr>
                     ))}
