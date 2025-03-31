@@ -127,7 +127,7 @@ const RegistrationPage = () => {
                 <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex justify-center items-center z-50">
                     <div className="bg-bg p-4 rounded-lg shadow-lg w-80 flex justify-between flex-col text-center">
                         <button onClick={handleClosePopup} className="font-extrabold text-right">X</button>
-                        <p className="px-4 py-4 text-2xl">
+                        <p className="px-4 py-4 text-xl">
                             {message}
                         </p>
                     </div>
