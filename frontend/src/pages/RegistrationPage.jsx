@@ -7,11 +7,9 @@ import Heading from "../components/Heading";
 const RegistrationPage = () => {
     const navigate = useNavigate();
     const videoRef = useRef(null);
-    const [scannedData, setScannedData] = useState(null);
     const scannerRef = useRef(null);
 
     const [message, setMessage] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         // Initialize QR scanner
@@ -102,7 +100,6 @@ const RegistrationPage = () => {
     },[]);
 
     const handleClosePopup = () => {
-        setScannedData(null);
         setMessage(null);
 
         if (scannerRef.current) {

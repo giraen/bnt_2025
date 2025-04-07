@@ -9,7 +9,6 @@ const DashboardPage = () => {
     const [message, setMessage] = useState(null);
 
     const videoRef = useRef(null);
-    const [scannedData, setScannedData] = useState(null);
     const scannerRef = useRef(null);
     const [refreshTable, setRefreshTable] = useState(false);
 
