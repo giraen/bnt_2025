@@ -16,8 +16,6 @@ const HomePage = () => {
 
     return(
         <>
-            <p>THIS IS THE HOME PAGE</p>
-
             {isAuth ? (
                 <>
                     <Link to="/dashboard">Dashboard (Admin)</Link> <br/>
