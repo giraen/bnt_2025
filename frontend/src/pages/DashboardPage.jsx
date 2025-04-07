@@ -70,7 +70,22 @@ const DashboardPage = () => {
                     return;
                 }
 
-                setMessage('You may now claim your lunch.');
+                // Get the user's food allergy
+                const { data: getFood, error: getFoodError } = await supabase
+                    .from("participants")
+                    .select("fullname, food_allergies")
+                    .eq("bnt_id", data)
+                    .single();
+
+                setMessage(
+                    <>
+                        <p>{getFood.fullname} can now claim the food.</p> <br/>
+                        <div className="grid grid-cols-1 grid-rows-[auto auto] text-sm">
+                            <p className="font-bold row-start-1 text-left">Food Note:</p>
+                            <p className="row-start-2 text-justify">{getFood.food_allergies}</p>
+                        </div>
+                    </>
+                );
 
             } catch (error) {
                 setMessage("This is not a valid BNT QR");
