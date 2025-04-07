@@ -29,7 +29,7 @@ const HomePage = () => {
             <br/>
 
             <Link to="/registration">To Registration (using QR)</Link> <br/>
-            <Link to="/altregistration">To Registration</Link>
+            {/* <Link to="/altregistration">To Registration</Link> */}
         </>
     )
 }
