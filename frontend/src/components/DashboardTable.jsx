@@ -11,7 +11,7 @@ const DashboardTable = ({refresh}) => {
             case '0':
                 return("Quizzer");
             case '1':
-                return("Tester");
+                return("Coach");
             case '2':
                 const { data: getCommittee, error: getCommitteeErr } = supabase
                     .from('committee')
@@ -23,10 +23,18 @@ const DashboardTable = ({refresh}) => {
                     console.log(getCommitteeErr);
                 }
                 
-                console.log(getCommittee);
-                break; 
+                return(getCommittee);
             case '3':
-                return("Coach/Participant");
+                const { data:getRole, error: getRoleErr } = supabase
+                    .from('participant') 
+                    .select('school')
+                    .eq('bnt_id', bnt_id)
+                    .single()
+                
+                if (getRoleErr) {
+                    console.log(getRoleErr);
+                }
+                return(getRole);
             default:
                 return("Unknown");
         }

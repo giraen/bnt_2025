@@ -78,7 +78,13 @@ const RegistrationPage = () => {
 
                 // Set the pop up message into
                 // "{fullname} from {school} is now registered."
-                setMessage(`${isRegistered.fullname} from ${isRegistered.school} is now registered.`);
+                setMessage(
+                    <>
+                        <p className='text-xs text-left pl-4'><strong>BNT ID: </strong>{`${data}`}</p>
+                        <p className="px-4 pb-4 text-sm">{`${isRegistered.fullname} (${isRegistered.school}) is now registered.`}</p>
+                    </>
+                    
+                );
 
             } catch (error) {
                 console.error("Invalid QR Code format:", error);
@@ -124,9 +130,9 @@ const RegistrationPage = () => {
                 <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex justify-center items-center z-50">
                     <div className="bg-bg p-4 rounded-lg shadow-lg w-80 flex justify-between flex-col text-center">
                         <button onClick={handleClosePopup} className="font-extrabold text-right">X</button>
-                        <p className="px-4 py-4 text-xl">
+                        <div className='text-center'>
                             {message}
-                        </p>
+                        </div>
                     </div>
                 </div>
             )}
