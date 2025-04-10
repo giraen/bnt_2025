@@ -36,7 +36,6 @@ const DashboardPage = () => {
                 const split_data = data.split('-');
                 scanner.stop();
                 
-                
                 if (split_data.length !== 2 || split_data[0] !== '25' || split_data[1].length !== 5) {
                     setMessage("Invalid QR code format.");
                     return;

@@ -3,6 +3,7 @@ import supabase from "../supabase-client";
 import { useEffect, useState, useRef } from "react";
 import Heading from "../components/Heading";
 import { useNavigate } from "react-router-dom";
+import DashboardTable from "../components/DashboardTable";
 
 const AltCommitteeFoodPage = () => {
     const videoRef = useRef(null);
@@ -11,6 +12,7 @@ const AltCommitteeFoodPage = () => {
 
     const [message, setMessage] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
+    const [refreshTable, setRefreshTable] = useState(false);
 
     const navigate = useNavigate();
 
@@ -102,7 +104,7 @@ const AltCommitteeFoodPage = () => {
 
     const handleClosePopup = () => {
         setMessage(null);
-        setShowPopup(false);
+        setRefreshTable(prev => !prev);
 
         if (scannerRef.current) {
             scannerRef.current.start();
@@ -117,9 +119,21 @@ const AltCommitteeFoodPage = () => {
 
             <Heading custom_heading={"FOOD FOR COMMITTEE"}/>
 
-            <div className="w-full h-96 flex flex-col items-center justify-center">
-                <p className='mb-2 md:text-lg'>Please present your Committee BNT ID</p>
-                <video ref={videoRef} className="h-full object-cover bg-[#000101]"></video>
+            <div className="grid grid-cols-1 grid-rows-9 md:grid-cols-5 md:grid-rows-5 gap-2 w-full md:h-screen h-full">
+                {/* Left div */}
+                <div className="w-full h-96 flex flex-col items-center justify-center">
+                    <p className='mb-2 md:text-lg'>Please present your Committee BNT ID</p>
+                    <video ref={videoRef} className="h-full object-cover bg-[#000101]"></video>
+                </div>
+
+                {/* Right div */}
+                <div className="row-span-3 md:col-span-3 md:row-span-5 md:col-start-3 sm:row-start-7 w-full overflow-y-auto md:py-28 md:pl-8 flex flex-col items-center">
+                    <p className="font-bold text-2xl mb-4">Recent Claim of Lunch</p>
+
+                    <div>
+                        <DashboardTable refresh={refreshTable}/>
+                    </div>
+                </div>
             </div>
 
             {message && (
