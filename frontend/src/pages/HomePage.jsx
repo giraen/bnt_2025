@@ -18,8 +18,9 @@ const HomePage = () => {
         <>
             {isAuth ? (
                 <>
-                    <Link to="/dashboard">Dashboard (Admin)</Link> <br/>
-                    <Link to="/committee">For Committee (Admin)</Link>
+                    <Link to="/dashboard">Dashboard (Participants)</Link> <br/>
+                    <Link to="/committee">For Committee (TUP ID)</Link> <br/>
+                    <Link to="/altcommittee">For Committee (BNT ID)</Link>
                 </>
             ) : (
                 <Link to="/login">Login (Admin)</Link>
@@ -27,7 +28,6 @@ const HomePage = () => {
             <br/>
 
             <Link to="/registration">To Registration (using QR)</Link> <br/>
-            {/* <Link to="/altregistration">To Registration</Link> */}
         </>
     )
 }

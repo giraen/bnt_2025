@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import Wrapper from './pages/Wrapper.jsx';
 import CommitteeFoodPage from './pages/CommitteeFoodPage.jsx';
+import AltCommitteeFoodPage from './pages/AltCommitteeFoodPage.jsx';
 
 function App() {
   return (
@@ -21,7 +22,8 @@ function App() {
             <Wrapper>
               <DashboardPage/>
             </Wrapper>
-          }/>
+          }
+        />
         
         <Route 
           path='/committee' 
@@ -29,7 +31,17 @@ function App() {
             <Wrapper>
               <CommitteeFoodPage />
             </Wrapper>
-          }/>
+          }
+        />
+
+        <Route 
+          path='/altcommittee' 
+          element={
+            <Wrapper>
+              <AltCommitteeFoodPage />
+            </Wrapper>
+          }
+        />
           
         <Route path='/registration' element={<RegistrationPage/>}/>
         <Route path='/altregistration' element={<AltRegistrationPage/>}/>
